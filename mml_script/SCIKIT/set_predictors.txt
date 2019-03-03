@@ -1,0 +1,16 @@
+name_predictors = "[[name_predictors]]"
+index_predictors = "[[index_predictors]]"
+
+index_predictors_list = []
+if index_predictors != "":
+    index_predictors_list = index_predictors.split("+")
+    
+name_predictors_list = []
+if name_predictors != "":
+    name_predictors_list = name_predictors.split("+")
+    
+for name_predictor in name_predictors_list:
+    index_predictors_list.append(list(mml_data.columns).index(name_predictor))
+    
+index_predictors_list=list(set(map(int,index_predictors_list)))
+predictors = predictors.iloc[:,index_predictors_list]

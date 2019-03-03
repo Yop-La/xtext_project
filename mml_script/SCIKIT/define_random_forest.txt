@@ -1,0 +1,14 @@
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+
+
+
+def train_model(X_train, y_train, n_estimators=100, max_depth=2,random_state=0):
+    model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth,random_state=random_state)
+    model.fit(X_train, y_train)
+    return(model)
+    
+def test_model(model, X_test):
+    predictions = model.predict(X_test)
+    return(list(predictions))
+    

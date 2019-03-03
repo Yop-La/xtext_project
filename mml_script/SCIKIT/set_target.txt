@@ -1,0 +1,9 @@
+target_index = "[[target_index]]"
+
+if target_index.replace('-','').isdigit():
+    target_index = int(target_index)
+else:
+    target_index = list(mml_data.columns).index(target_index)
+
+target = mml_data.iloc[:,target_index]
+predictors = mml_data.drop(mml_data.columns[target_index], axis=1)

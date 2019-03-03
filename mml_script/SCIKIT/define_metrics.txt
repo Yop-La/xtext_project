@@ -1,0 +1,28 @@
+metrics = "[[metrics]]";
+metrics = metrics.split("+")
+
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import f1_score
+
+def compute_metrics(y_prediction,y_test,metrics):
+    
+    metrics_performance = {};
+    
+    for metric in metrics:
+
+        
+        if "RECALL" == metric:        
+            recall = recall_score(y_test, y_prediction, average='macro')     
+            metrics_performance["RECALL"] = recall
+
+
+        if "PRECISION" == metric:
+            precision = precision_score(y_test, y_prediction, average='macro')     
+            metrics_performance["PRECISION"] = precision
+
+        if "F1" == metric:
+            f1 = f1_score(y_test, y_prediction, average='macro')     
+            metrics_performance["F1"] = f1
+
+    return(metrics_performance)

@@ -1,0 +1,30 @@
+from sklearn.model_selection import KFold
+
+n_splits = [[n_splits]]
+
+kf = KFold(n_splits=n_splits)
+kf.get_n_splits(predictors)
+
+
+list_of_dataframes = []
+
+index = 0
+for train_index, test_index in kf.split(predictors):
+   
+    X_train, X_test = predictors.iloc[train_index,:], predictors.iloc[test_index,:]
+    y_train, y_test = target.iloc[train_index], target.iloc[test_index]
+   
+    model = train_model(X_train, y_train)
+   
+    y_prediction = test_model(model, X_test)
+   
+    res_metrics = compute_metrics(y_prediction,y_test,metrics)
+   
+    res_metrics_tempo = pd.DataFrame(res_metrics, index=[index])
+    index=index+1
+    
+    list_of_dataframes.append(res_metrics_tempo)
+    
+    
+metrics = pd.concat(list_of_dataframes)
+metrics = dict(metrics.mean())
