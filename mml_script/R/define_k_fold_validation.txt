@@ -1,0 +1,46 @@
+n_splits = [[n_splits]]
+
+require(caret)
+folds_index = createFolds(predictors$X, k = n_splits, list = TRUE, returnTrain = TRUE)
+f1 = c();
+precision = c();
+recall = c();
+for(train_ind in folds_index){
+  
+  X_train = predictors[train_ind,]
+  X_test = predictors[-train_ind,]
+  y_train = target[train_ind]
+  y_test = target[-train_ind]
+  
+  model = train_model(X_train, y_train)
+  
+  y_prediction = test_model(model, X_test)
+  
+  metrics_res = compute_metrics(y_prediction,y_test,metrics)
+  
+  if(!is.null(metrics_res$RECALL)){
+    recall = c(recall,metrics_res$RECALL)
+  }
+  
+  if(!is.null(metrics_res$PRECISION)){
+    precision = c(precision,metrics_res$PRECISION)
+  }
+  if(!is.null(metrics_res$F1)){
+    f1 = c(f1,metrics_res$F1)
+  }
+  
+  
+}
+
+metrics_final=list();
+if(!is.null(f1)){
+  metrics_final$F1 = mean(f1)
+}
+if(!is.null(precision)){
+  metrics_final$PRECISION = mean(precision)
+}
+if(!is.null(recall)){
+  metrics_final$RECALL = mean(recall)
+}
+
+metrics = metrics_final

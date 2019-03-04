@@ -1,0 +1,28 @@
+metrics = "[[metrics]]";
+
+metrics = strsplit(metrics, "+",fixed=TRUE)[[1]]
+
+compute_metrics <- function(predicted, expected,metrics) {
+  predicted <- factor(as.character(predicted), levels=unique(as.character(expected)))
+  expected  <- as.factor(expected)
+  cm = as.matrix(table(expected, predicted))
+  
+  precision <- diag(cm) / colSums(cm)
+  recall <- diag(cm) / rowSums(cm)
+  f1 <-  ifelse(precision + recall == 0, 0, 2 * precision * recall / (precision + recall))
+  
+  #Assuming that F1 is zero when it's not possible compute it
+  f1[is.na(f1)] <- 0
+  precision[is.na(precision)] <- 0
+  recall[is.na(recall)] <- 0
+  
+  
+  #Binary F1 or Multi-class macro-averaged F1
+  f1 <-  ifelse(nlevels(expected) == 2, f1[positive.class], mean(f1))
+  precision <-  ifelse(nlevels(expected) == 2, precision[positive.class], mean(precision))
+  recall <-  ifelse(nlevels(expected) == 2, recall[positive.class], mean(recall))
+  
+  ret <- list(F1 = f1,PRECISION = precision,RECALL = recall)
+  
+  return(ret[metrics])
+}

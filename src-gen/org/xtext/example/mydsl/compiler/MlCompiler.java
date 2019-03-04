@@ -79,18 +79,25 @@ public class MlCompiler {
 	public String execute() throws IOException, InterruptedException {
 
 
-		if(this.library	== "SCIKIT") {
+		if(this.library.equals("SCIKIT")) {
+			
 
 			writeCode("#!/bin/bash", this.shell_path);
 			writeCode("cd /home/ensai/anaconda3/bin", this.shell_path);
 			writeCode("source activate keras", this.shell_path);
 			writeCode("python3 "+this.path_output, this.shell_path);
 		}
+		
+		if(this.library.equals("R")) {
+
+			writeCode("#!/bin/bash", this.shell_path);
+			writeCode("Rscript "+this.path_output, this.shell_path);
+		}
 
 
 		String cmd = "bash " + this.shell_path;
 
-
+		
 		Process p = Runtime.getRuntime().exec(cmd);
 
 
@@ -429,7 +436,6 @@ public class MlCompiler {
 
 
 		String path_code = code_folder + this.library + "/data_importation.txt";
-
 
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
 		String sep = ",";

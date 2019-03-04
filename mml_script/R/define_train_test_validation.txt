@@ -1,0 +1,18 @@
+test_size = 1 - [[test_size]] / 100
+
+smp_size <- floor(test_size * nrow(mml_data))
+
+## set the seed to make your partition reproducible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(mml_data)), size = smp_size)
+
+X_train = predictors[train_ind,]
+X_test = predictors[-train_ind,]
+y_train = target[train_ind]
+y_test = target[-train_ind]
+
+model = train_model(X_train, y_train)
+
+y_prediction = test_model(model, X_test)
+
+metrics = compute_metrics(y_prediction,y_test,metrics)

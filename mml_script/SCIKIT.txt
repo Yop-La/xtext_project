@@ -1,7 +1,7 @@
 
 import pandas as pd
 mml_data = pd.read_csv("/home/ensai/Dropbox/ENSAI/Ressources/S5/dsl/projet/ensai-sid-mml/org.xtext.example.mml/mml_data/iris.csv", sep=",")
-target_index = "Species"
+target_index = "-1"
 
 if target_index.replace('-','').isdigit():
     target_index = int(target_index)
@@ -11,11 +11,13 @@ else:
 target = mml_data.iloc[:,target_index]
 predictors = mml_data.drop(mml_data.columns[target_index], axis=1)
 
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
 
 
-def train_model(X_train, y_train,C=1e5, solver='lbfgs', multi_class='multinomial'):
-    model = LogisticRegression(C=C, solver=solver, multi_class=multi_class)
+
+def train_model(X_train, y_train, n_estimators=100, max_depth=2,random_state=0):
+    model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth,random_state=random_state)
     model.fit(X_train, y_train)
     return(model)
     
@@ -24,7 +26,7 @@ def test_model(model, X_test):
     return(list(predictions))
     
 
-metrics = "RECALL+F1+PRECISION";
+metrics = "RECALL+PRECISION";
 metrics = metrics.split("+")
 
 from sklearn.metrics import recall_score
@@ -52,17 +54,36 @@ def compute_metrics(y_prediction,y_test,metrics):
             metrics_performance["F1"] = f1
 
     return(metrics_performance)
-test_size = 1 - 70 / 100
+from sklearn.model_selection import KFold
 
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(predictors, target, test_size=test_size,random_state=109)
+n_splits = 20
+
+kf = KFold(n_splits=n_splits)
+kf.get_n_splits(predictors)
 
 
-model = train_model(X_train, y_train)
+list_of_dataframes = []
 
-y_prediction = test_model(model, X_test)
-
-metrics = compute_metrics(y_prediction,y_test,metrics)
+index = 0
+for train_index, test_index in kf.split(predictors):
+   
+    X_train, X_test = predictors.iloc[train_index,:], predictors.iloc[test_index,:]
+    y_train, y_test = target.iloc[train_index], target.iloc[test_index]
+   
+    model = train_model(X_train, y_train)
+   
+    y_prediction = test_model(model, X_test)
+   
+    res_metrics = compute_metrics(y_prediction,y_test,metrics)
+   
+    res_metrics_tempo = pd.DataFrame(res_metrics, index=[index])
+    index=index+1
+    
+    list_of_dataframes.append(res_metrics_tempo)
+    
+    
+metrics = pd.concat(list_of_dataframes)
+metrics = dict(metrics.mean())
 
 path_metrics_python = "/home/ensai/Dropbox/ENSAI/Ressources/S5/dsl/projet/ensai-sid-mml/org.xtext.example.mml/mml_data/metrics_SCIKIT"
 

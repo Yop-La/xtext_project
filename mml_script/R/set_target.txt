@@ -1,0 +1,14 @@
+target_index = "[[target_index]]"
+
+if(is.na(strtoi(target_index))){
+  target_index = grep(target_index, colnames(mml_data))
+  
+}else{
+  if(target_index == -1){
+    target_index = length(colnames(mml_data))
+  }
+  target_index = strtoi(target_index)
+}
+
+target = mml_data[,target_index]
+predictors =mml_data[,-target_index]

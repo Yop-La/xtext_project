@@ -1,0 +1,26 @@
+name_predictors = "[[name_predictors]]"
+index_predictors = "[[index_predictors]]"
+
+index_predictors_list = c()
+if(index_predictors != ""){
+  index_predictors_list = strsplit(index_predictors, "+",fixed=TRUE)[[1]]
+}
+
+name_predictors_list = c()
+if(name_predictors != ""){
+  name_predictors_list = strsplit(name_predictors, "+",fixed=TRUE)[[1]]
+}
+
+for(name_predictor in name_predictors_list){
+  grep(name_predictor, colnames(mml_data))
+  index_predictors_list <- c(grep(name_predictor, colnames(mml_data)),index_predictors_list)
+}
+
+
+
+index_predictors_list = unique(index_predictors_list)
+
+index_predictors_list = strtoi(index_predictors_list)
+
+
+predictors<-mml_data[,index_predictors_list]

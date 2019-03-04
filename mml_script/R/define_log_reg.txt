@@ -1,0 +1,8 @@
+library(nnet)
+train_model <- function(X_train, y_train){
+  model <- multinom(y_train ~ ., data = X_train,trace=FALSE)
+}
+test_model <- function(model,X_test){
+  pred = predict(model, X_test, type="class")
+  return(pred)
+}

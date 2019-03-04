@@ -1,0 +1,9 @@
+require(e1071)
+train_model <- function(X_train, y_train){
+  model = svm(y_train ~ ., data = X_train)  
+}
+
+test_model <- function(model,X_test){
+  pred = predict(model, X_test, type="class")
+  return(pred)
+}
