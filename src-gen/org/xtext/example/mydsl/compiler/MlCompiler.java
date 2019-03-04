@@ -1,9 +1,11 @@
 package org.xtext.example.mydsl.compiler;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -19,10 +21,8 @@ import org.xtext.example.mydsl.mml.CrossValidation;
 import org.xtext.example.mydsl.mml.DT;
 import org.xtext.example.mydsl.mml.DataInput;
 import org.xtext.example.mydsl.mml.FormulaItem;
-import org.xtext.example.mydsl.mml.FrameworkLang;
 import org.xtext.example.mydsl.mml.LogisticRegression;
 import org.xtext.example.mydsl.mml.MLAlgorithm;
-import org.xtext.example.mydsl.mml.MLChoiceAlgorithm;
 import org.xtext.example.mydsl.mml.MMLModel;
 import org.xtext.example.mydsl.mml.PredictorVariables;
 import org.xtext.example.mydsl.mml.RFormula;
@@ -41,6 +41,7 @@ public class MlCompiler {
 	private String code;
 	private String code_folder;
 	private String data_folder;
+	private String shell_path;
 
 	public MlCompiler(String programme,String code_folder, String data_folder) throws IOException{
 
@@ -50,20 +51,77 @@ public class MlCompiler {
 		this.code_folder = code_folder;
 		this.data_folder = data_folder;
 		this.path_output = code_folder+this.library+".txt";
+		this.shell_path = code_folder+this.library+".sh";
 
 		this.code = "";
 
 		// on reset le file de sortie
-		File file = new File(path_output);
-		file.delete();
+		File output = new File(path_output);
+		output.delete();
 
+		File shell = new File(shell_path);
+		shell.delete();
+
+
+
+	}
+
+	public void compile() throws IOException {
 
 		dataPreparation();
 		algoDefinition();
 		algoValidation();
+		saveMetrics();
+		writeCode(code,this.path_output);
 
-		writeCode(code);
+	}
 
+	public String execute() throws IOException, InterruptedException {
+
+
+		if(this.library	== "SCIKIT") {
+
+			writeCode("#!/bin/bash", this.shell_path);
+			writeCode("cd /home/ensai/anaconda3/bin", this.shell_path);
+			writeCode("source activate keras", this.shell_path);
+			writeCode("python3 "+this.path_output, this.shell_path);
+		}
+
+
+		String cmd = "bash " + this.shell_path;
+
+
+		Process p = Runtime.getRuntime().exec(cmd);
+
+
+		// to print errors
+		try {
+			p.waitFor();
+			final int exitValue = p.waitFor();
+			if (exitValue != 0){
+				
+				try (final BufferedReader b = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
+					String line;
+					if ((line = b.readLine()) != null)
+						System.out.println(line);
+				} catch (final IOException e) {
+					e.printStackTrace();
+				}                
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+
+		// to get the result of the cmd
+		String retour = "";
+		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		String line; 
+		while ((line = in.readLine()) != null) {
+			retour += line;
+	    }
+
+		return(retour);
 
 	}
 
@@ -88,28 +146,23 @@ public class MlCompiler {
 	private void algoDefinition() throws IOException {
 
 
-		System.out.println("algo");
 
 		MLAlgorithm mlAlgo = this.result.getAlgorithm().getAlgorithm();
 
 		if(mlAlgo instanceof SVM) {
-			System.out.println("svm");
 			svmDefinition();
 
 		}
 
 		if(mlAlgo instanceof DT) {
-			System.out.println("DT");
 			decisionTreeDefinition();
 		}
 
 		if(mlAlgo instanceof RandomForest) {
-			System.out.println("Random Forest");
 			randomForestDefinition();
 		}
 
 		if(mlAlgo instanceof LogisticRegression) {
-			System.out.println("Logistic");
 			logRegDefinition();
 		}
 
@@ -146,6 +199,22 @@ public class MlCompiler {
 		this.appendCode(code);
 
 	}
+
+	private void saveMetrics() throws IOException {
+
+
+
+		String path_code = code_folder + this.library + "/save_metrics.txt";
+		String path_metrics_python = this.data_folder + "metrics_"+this.library;
+
+
+		String code = this.readFile(path_code,Charset.defaultCharset()) ;
+		code = code.replace("[[path_metrics_python]]", path_metrics_python);
+
+		this.appendCode(code);
+
+	}
+
 
 	private void algoValidation() throws IOException {
 
@@ -184,7 +253,6 @@ public class MlCompiler {
 
 		int n_splits = crossValidation.getNumber();
 
-		System.out.println("n_splits : " + n_splits);
 
 		String path_code = code_folder + this.library + "/define_k_fold_validation.txt";
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
@@ -273,7 +341,6 @@ public class MlCompiler {
 
 			if(xformula instanceof PredictorVariables) {
 
-				System.out.println("PredictorVariables");
 
 				PredictorVariables predictorsVariables = (PredictorVariables) xformula;
 				List<FormulaItem> listFormulaItem = predictorsVariables.getVars();
@@ -380,8 +447,8 @@ public class MlCompiler {
 		this.code = this.code + "\n" + code;
 	}
 
-	private void writeCode(String code) {
-		try(FileWriter fw = new FileWriter(this.path_output, true);
+	private void writeCode(String code, String pathFile) {
+		try(FileWriter fw = new FileWriter(pathFile, true);
 				BufferedWriter bw = new BufferedWriter(fw);
 				PrintWriter out = new PrintWriter(bw))
 		{

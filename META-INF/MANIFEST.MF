@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.xtext.example.mml
 Bundle-Vendor: My Company
 Bundle-Version: 1.0.0.qualifier
-Bundle-SymbolicName: org.xtext.example.mml; singleton:=true
+Bundle-SymbolicName: fr.ensai.dsl.mml;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.xbase,

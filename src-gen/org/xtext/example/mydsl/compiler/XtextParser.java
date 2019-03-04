@@ -18,7 +18,6 @@ public class XtextParser {
 	private IParser parser;
 
 	public XtextParser() {
-		System.out.println("aa");
 		setupParser();
 	}
 

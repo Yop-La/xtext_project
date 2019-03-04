@@ -1,0 +1,10 @@
+
+path_metrics_python = "[[path_metrics_python]]"
+
+import json
+json_metrics = json.dumps(metrics, ensure_ascii=False)
+
+with open(path_metrics_python, "w") as text_file:
+    text_file.write(json_metrics)
+    
+print(json_metrics)

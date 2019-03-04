@@ -63,3 +63,13 @@ model = train_model(X_train, y_train)
 y_prediction = test_model(model, X_test)
 
 metrics = compute_metrics(y_prediction,y_test,metrics)
+
+path_metrics_python = "/home/ensai/Dropbox/ENSAI/Ressources/S5/dsl/projet/ensai-sid-mml/org.xtext.example.mml/mml_data/metrics_SCIKIT"
+
+import json
+json_metrics = json.dumps(metrics, ensure_ascii=False)
+
+with open(path_metrics_python, "w") as text_file:
+    text_file.write(json_metrics)
+    
+print(json_metrics)

@@ -33,7 +33,10 @@ public class Main {
 			String data_folder = System.getProperty("user.dir")+"/mml_data/";
 			try {
 				MlCompiler compiler = new MlCompiler(initialString,code_folder, data_folder);
-			} catch (IOException e) {
+				compiler.compile();
+				String retour = compiler.execute();
+				System.out.println(retour);
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
