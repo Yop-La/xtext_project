@@ -8,9 +8,6 @@ MMLModel:
 	formula=RFormula?
 	validation=Validation
 	;
-
-
-
 	
 /*
  * 
@@ -25,9 +22,6 @@ CSVParsingConfiguration:
 ;
 
 enum CSVSeparator : COMMA=',' | SEMI_COLON=";" ;
-
-
-
 
 /*
  * mini DSL to select the ML algorithm we want 
