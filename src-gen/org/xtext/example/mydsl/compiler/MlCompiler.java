@@ -28,6 +28,8 @@ import org.xtext.example.mydsl.mml.PredictorVariables;
 import org.xtext.example.mydsl.mml.RFormula;
 import org.xtext.example.mydsl.mml.RandomForest;
 import org.xtext.example.mydsl.mml.SVM;
+import org.xtext.example.mydsl.mml.SVMClassification;
+import org.xtext.example.mydsl.mml.SVMKernel;
 import org.xtext.example.mydsl.mml.StratificationMethod;
 import org.xtext.example.mydsl.mml.TrainingTest;
 import org.xtext.example.mydsl.mml.ValidationMetric;
@@ -48,10 +50,13 @@ public class MlCompiler {
 		this.result = this.parseProgram(programme);
 
 		this.library = this.result.getAlgorithm().getFramework().getName();
+
+
 		this.code_folder = code_folder;
 		this.data_folder = data_folder;
-		this.path_output = code_folder+this.library+".txt";
-		this.shell_path = code_folder+this.library+".sh";
+
+		this.path_output = this.code_folder+this.library+".txt";
+		this.shell_path = this.code_folder+"lauch_container_"+this.library+".sh";
 
 		this.code = "";
 
@@ -80,24 +85,32 @@ public class MlCompiler {
 
 
 		if(this.library.equals("SCIKIT")) {
-			
 
 			writeCode("#!/bin/bash", this.shell_path);
-			writeCode("cd /home/ensai/anaconda3/bin", this.shell_path);
-			writeCode("source activate keras", this.shell_path);
-			writeCode("python3 "+this.path_output, this.shell_path);
+
+
+			writeCode("[ -d \"/home/ensai/anaconda3\" ] &&	/home/ensai/anaconda3/bin/python3 "+this.path_output, this.shell_path);
+
+
+			writeCode("[ -d \"/root/anaconda\" ] &&	/root/anaconda/bin/python3 "+this.path_output, this.shell_path);
+
+
 		}
-		
+
 		if(this.library.equals("R")) {
 
 			writeCode("#!/bin/bash", this.shell_path);
 			writeCode("Rscript "+this.path_output, this.shell_path);
+
 		}
 
 
 		String cmd = "bash " + this.shell_path;
 
-		
+		System.out.println(cmd);
+
+
+
 		Process p = Runtime.getRuntime().exec(cmd);
 
 
@@ -106,11 +119,11 @@ public class MlCompiler {
 			p.waitFor();
 			final int exitValue = p.waitFor();
 			if (exitValue != 0){
-				
+
 				try (final BufferedReader b = new BufferedReader(new InputStreamReader(p.getErrorStream()))) {
 					String line;
 					if ((line = b.readLine()) != null)
-						System.out.println(line);
+						System.out.println("err : " + line);
 				} catch (final IOException e) {
 					e.printStackTrace();
 				}                
@@ -126,7 +139,7 @@ public class MlCompiler {
 		String line; 
 		while ((line = in.readLine()) != null) {
 			retour += line;
-	    }
+		}
 
 		return(retour);
 
@@ -153,15 +166,18 @@ public class MlCompiler {
 	private void algoDefinition() throws IOException {
 
 
-
 		MLAlgorithm mlAlgo = this.result.getAlgorithm().getAlgorithm();
 
 		if(mlAlgo instanceof SVM) {
-			svmDefinition();
 
+
+			svmDefinition();
 		}
 
 		if(mlAlgo instanceof DT) {
+
+			DT mDT = (DT) mlAlgo;
+			//			int profondeur = mDT.getMax_depth();			
 			decisionTreeDefinition();
 		}
 
@@ -185,22 +201,20 @@ public class MlCompiler {
 
 
 	private void decisionTreeDefinition() throws IOException {
-
 		String path_code = code_folder + this.library + "/define_decision_tree.txt";
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
+
 		this.appendCode(code);
 	}
 
 	private void svmDefinition() throws IOException {
-
 		String path_code = code_folder + this.library + "/define_svm.txt";
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
-		this.appendCode(code);
 
+		this.appendCode(code);
 	}
 
 	private void randomForestDefinition() throws IOException {
-
 		String path_code = code_folder + this.library + "/define_random_forest.txt";
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
 		this.appendCode(code);
@@ -216,7 +230,6 @@ public class MlCompiler {
 
 
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
-		code = code.replace("[[path_metrics_python]]", path_metrics_python);
 
 		this.appendCode(code);
 
@@ -437,12 +450,12 @@ public class MlCompiler {
 
 		String path_code = code_folder + this.library + "/data_importation.txt";
 
-		String code = this.readFile(path_code,Charset.defaultCharset()) ;
+		String code = this.readFile(path_code,Charset.defaultCharset());
 		String sep = ",";
+
 
 		code = code.replace("[path]", this.data_folder+fileLocation);
 		code = code.replace("[sep]", sep);
-
 
 
 		this.appendCode(code);
