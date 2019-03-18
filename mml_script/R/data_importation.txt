@@ -1,3 +1,4 @@
+options(warn=-1)
 mml_data = read.csv("[path]", sep="[sep]")      
 set.seed(0)
 options(warn=-1)

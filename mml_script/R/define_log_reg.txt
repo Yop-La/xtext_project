@@ -1,4 +1,4 @@
-library(nnet)
+try(library(nnet), silent=TRUE)
 train_model <- function(X_train, y_train){
   model <- multinom(y_train ~ ., data = X_train,trace=FALSE)
 }

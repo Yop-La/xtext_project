@@ -1,4 +1,4 @@
-require(rpart)
+try(library(rpart), silent=TRUE)
 train_model <- function(X_train, y_train){
   model = rpart(y_train ~ ., data = X_train)
 }

@@ -1,4 +1,4 @@
-require(e1071)
+try(library(e1071), silent=TRUE)
 train_model <- function(X_train, y_train){
   model = svm(y_train ~ ., data = X_train)  
 }

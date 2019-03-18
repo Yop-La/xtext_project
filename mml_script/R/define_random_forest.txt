@@ -1,4 +1,4 @@
-require(randomForest)
+try(library(randomForest), silent=TRUE)
 train_model <- function(X_train, y_train){
   model = randomForest(y_train ~ ., data = X_train)
 }

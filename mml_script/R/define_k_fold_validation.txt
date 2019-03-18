@@ -1,6 +1,7 @@
 n_splits = [[n_splits]]
 
-require(caret)
+
+try(library(caret), silent=TRUE)
 folds_index = createFolds(predictors$X, k = n_splits, list = TRUE, returnTrain = TRUE)
 f1 = c();
 precision = c();
