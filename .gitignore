@@ -56,3 +56,15 @@ local.properties
 .worksheet
 
 *.xtendbin
+
+mml_script/lauch_container_R\.sh
+
+mml_script/lauch_container_SCIKIT\.sh
+
+mml_script/R\.txt
+
+mml_script/SCIKIT\.sh
+
+mml_script/SCIKIT\.txt
+
+mml_script/SCIKIT/lauch_container_SCIKIT\.sh
