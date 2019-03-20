@@ -47,27 +47,19 @@ public class MlCompiler {
 
 	public MlCompiler(String programme,String code_folder, String data_folder) throws IOException{
 
-		this.result = this.parseProgram(programme);
-
-		this.library = this.result.getAlgorithm().getFramework().getName();
-
-
 		this.code_folder = code_folder;
 		this.data_folder = data_folder;
 
-		this.path_output = this.code_folder+this.library+".txt";
-		this.shell_path = this.code_folder+"lauch_container_"+this.library+".sh";
+		load(programme);
 
-		this.code = "";
+	}
 
-		// on reset le file de sortie
+	private void cleanFiles() {
 		File output = new File(path_output);
 		output.delete();
 
 		File shell = new File(shell_path);
 		shell.delete();
-
-
 
 	}
 
@@ -81,36 +73,40 @@ public class MlCompiler {
 
 	}
 
+
+	public void load(String programme) throws IOException {
+
+		this.result = this.parseProgram(programme);
+
+		this.library = this.result.getAlgorithm().getFramework().getName();
+
+
+
+		this.path_output = this.code_folder+this.library+".txt";
+		this.shell_path = this.code_folder+this.library+".sh";
+
+		this.code = "";
+
+		cleanFiles();
+
+
+	}
+
 	public String execute() throws IOException, InterruptedException {
-
-
 		if(this.library.equals("SCIKIT")) {
 
 			writeCode("#!/bin/bash", this.shell_path);
-
-
-			writeCode("[ -d \"/home/ensai/anaconda3\" ] &&	/home/ensai/anaconda3/bin/python3 "+this.path_output, this.shell_path);
-
-
-			writeCode("[ -d \"/root/anaconda\" ] &&	/root/anaconda/bin/python3 "+this.path_output, this.shell_path);
-
-
+			writeCode("[ -d \"/home/ensai/anaconda3\" ] &&	/home/ensai/anaconda3/bin/python3 "
+					+this.path_output, this.shell_path);
+			writeCode("[ -d \"/root/anaconda\" ] &&	/root/anaconda/bin/python3 "
+					+this.path_output, this.shell_path);
 		}
 
 		if(this.library.equals("R")) {
-
 			writeCode("#!/bin/bash", this.shell_path);
 			writeCode("Rscript "+this.path_output, this.shell_path);
-
 		}
-
-
 		String cmd = "bash " + this.shell_path;
-
-		System.out.println(cmd);
-
-
-
 		Process p = Runtime.getRuntime().exec(cmd);
 
 
@@ -158,8 +154,6 @@ public class MlCompiler {
 		model = (MMLModel) result;
 
 		return(model);
-
-
 
 	}
 
@@ -226,8 +220,6 @@ public class MlCompiler {
 
 
 		String path_code = code_folder + this.library + "/save_metrics.txt";
-		String path_metrics_python = this.data_folder + "metrics_"+this.library;
-
 
 		String code = this.readFile(path_code,Charset.defaultCharset()) ;
 
